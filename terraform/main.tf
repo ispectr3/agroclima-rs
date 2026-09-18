@@ -31,7 +31,7 @@ resource "aws_s3_bucket_versioning" "lake_versioning" {
   }
 }
 
-# 2. Prefixes simulando as camadas Bronze, Prata e Ouro
+# 2. Pastas simulando as camadas Bronze, Prata e Ouro
 resource "aws_s3_object" "bronze_folder" {
   bucket = aws_s3_bucket.data_lake.id
   key    = "bronze/inmet/"
@@ -50,10 +50,10 @@ resource "aws_s3_object" "gold_folder" {
 # 3. AWS Glue Catalog Database para consultas SQL via Athena
 resource "aws_glue_catalog_database" "agroclima_db" {
   name        = "agroclima_rs_db"
-  description = "Catalogo de dados climaticos e agricolas do Sul do RS"
+  description = "Catalogo de dados climaticos e analiticos do Sul do RS"
 }
 
-# 4. Tabela Externa no Glue Catalog para a camada Ouro
+# 4. Tabela Externa no Glue Catalog para a camada Ouro (Schema Completo com todas as 28 colunas)
 resource "aws_glue_catalog_table" "gold_features_table" {
   name          = "gold_features_rain_d1"
   database_name = aws_glue_catalog_database.agroclima_db.name
@@ -74,24 +74,99 @@ resource "aws_glue_catalog_table" "gold_features_table" {
       serialization_library = "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe"
     }
 
+    # Identificadores e Geografia
     columns {
       name = "station_id"
       type = "string"
+    }
+    columns {
+      name = "codigo_ibge"
+      type = "bigint"
     }
     columns {
       name = "municipio"
       type = "string"
     }
     columns {
+      name = "lat"
+      type = "double"
+    }
+    columns {
+      name = "lon"
+      type = "double"
+    }
+    columns {
+      name = "altitude"
+      type = "double"
+    }
+    columns {
       name = "date"
       type = "string"
+    }
+
+    # Observacoes Meteorologicas Diarias
+    columns {
+      name = "precip_mm"
+      type = "double"
+    }
+    columns {
+      name = "temp_min"
+      type = "double"
+    }
+    columns {
+      name = "temp_max"
+      type = "double"
+    }
+    columns {
+      name = "temp_avg"
+      type = "double"
+    }
+    columns {
+      name = "humidity_avg"
+      type = "double"
+    }
+    columns {
+      name = "pressure_avg"
+      type = "double"
+    }
+    columns {
+      name = "wind_speed"
+      type = "double"
+    }
+    columns {
+      name = "solar_radiation"
+      type = "double"
+    }
+
+    # Alvo D+1
+    columns {
+      name = "precip_tomorrow"
+      type = "double"
     }
     columns {
       name = "rain_tomorrow"
       type = "int"
     }
+
+    # Features Preditivas
     columns {
-      name = "precip_mm"
+      name = "precip_lag_1d"
+      type = "double"
+    }
+    columns {
+      name = "precip_lag_2d"
+      type = "double"
+    }
+    columns {
+      name = "precip_sum_3d"
+      type = "double"
+    }
+    columns {
+      name = "precip_sum_7d"
+      type = "double"
+    }
+    columns {
+      name = "rain_days_7d"
       type = "double"
     }
     columns {
@@ -100,6 +175,22 @@ resource "aws_glue_catalog_table" "gold_features_table" {
     }
     columns {
       name = "dry_days"
+      type = "double"
+    }
+    columns {
+      name = "temp_avg_3d"
+      type = "double"
+    }
+    columns {
+      name = "humidity_avg_3d"
+      type = "double"
+    }
+    columns {
+      name = "day_of_year_sin"
+      type = "double"
+    }
+    columns {
+      name = "day_of_year_cos"
       type = "double"
     }
   }

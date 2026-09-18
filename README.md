@@ -163,16 +163,46 @@ python3 src/pipeline.py
 
 ---
 
-## 8. API de Consulta Pronta para Uso (`src/api.py`)
+## 8. API de Consulta e Inferência ao Vivo (`src/api.py`)
 
-Em conformidade com o requisito de entregar **informação pronta para consumo**, o projeto inclui uma API REST construída em FastAPI:
+O projeto disponibiliza uma API REST em **FastAPI** que executa **inferência em tempo real** utilizando o modelo Random Forest treinado e serializado (`src/model.joblib`):
 
 ```bash
-# Iniciar o servidor da API
+# 1. (Opcional) Re-treinar e serializar o modelo Random Forest
+python3 src/train.py
+
+# 2. Iniciar o servidor da API
 uvicorn src.api:app --reload --port 8000
 ```
 
-- **Documentação Swagger interativa:** `http://localhost:8000/docs`
+- **Documentação interativa Swagger:** `http://localhost:8000/docs`
 - **Rotas principais:**
-  - `GET /estacoes`: Retorna a lista dos 10 municípios e estações monitoradas.
-  - `GET /previsao?station_id=A887`: Retorna as condições climáticas consolidadas e o alerta de chuva no dia seguinte (D+1).
+  - `GET /estacoes`: Retorna a lista das 10 estações e municípios monitorados com suas coordenadas.
+  - `GET /previsao?station_id=A887`: Alimenta o vetor de features da data informada no pipeline do modelo treinado (`model.joblib`), calculando a probabilidade de chuva ao vivo e aplicando o threshold de decisão (0,30).
+
+---
+
+## 9. Testes Automatizados
+
+O repositório inclui testes unitários que cobrem as funções reais de transformação de dados e a inferência da API:
+
+```bash
+python3 -m unittest discover -s tests
+```
+
+---
+
+## 10. Obtenção dos Dados Brutos do INMET (`2026.zip`)
+
+Por limitações de cota do GitHub (arquivos > 50 MB), o pacote bruto nacional de 2026 não é versionado integralmente no repositório. O repositório já inclui na pasta `data/bronze/` os CSVs extraídos das 10 estações do Sul do RS.
+
+Caso deseje reexecutar a extração a partir do pacote nacional completo:
+1. Acesse o portal oficial do [INMET BDMEP](https://portal.inmet.gov.br/dadoshistoricos).
+2. Baixe o arquivo anual compactado `2026.zip`.
+3. Posicione o arquivo na raiz do projeto ou informe o caminho ao executar `python3 src/pipeline.py`.
+
+---
+
+## 11. Licença
+
+Este projeto é disponibilizado sob a licença [MIT](https://opensource.org/licenses/MIT).

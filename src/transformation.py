@@ -8,6 +8,12 @@ import io
 import pandas as pd
 import numpy as np
 
+# Metadados das estações da Região Intermediária de Pelotas/Bagé (IBGE 4302)
+try:
+    from src.ingestion import STATIONS_4302
+except ImportError:
+    from ingestion import STATIONS_4302
+
 def transform_bronze_to_silver(bronze_dir: str = "data/bronze", output_path: str = "data/silver/fact_weather_daily.parquet"):
     """
     Camada Prata:
@@ -15,16 +21,20 @@ def transform_bronze_to_silver(bronze_dir: str = "data/bronze", output_path: str
     - Substitui valores ausentes sentinela (-9999) por NaN.
     - Converte formatos numéricos brasileiros (vírgula para ponto).
     - Agrega dados horários em diários por estação e município.
+    - Associa o codigo_ibge a partir do catálogo STATIONS_4302.
     """
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
     daily_records = []
 
-    for fname in os.listdir(bronze_dir):
+    for fname in sorted(os.listdir(bronze_dir)):
         if not fname.endswith(".csv"):
             continue
         filepath = os.path.join(bronze_dir, fname)
         with open(filepath, "r", encoding="latin1") as f:
             lines = f.read().splitlines()
+
+        if len(lines) < 9:
+            continue
 
         # Extrai metadados do cabeçalho
         station_meta = {}
@@ -34,9 +44,13 @@ def transform_bronze_to_silver(bronze_dir: str = "data/bronze", output_path: str
                 station_meta[parts[0].strip().replace(":", "")] = parts[1].strip()
 
         code = station_meta.get("CODIGO (WMO)", fname.split("_")[0])
-        municipio = station_meta.get("ESTACAO", "N/A")
-        lat = float(station_meta.get("LATITUDE", "-31.0").replace(",", "."))
-        lon = float(station_meta.get("LONGITUDE", "-52.0").replace(",", "."))
+        # Puxa dados consolidados do catálogo geográfico
+        catalog_info = STATIONS_4302.get(code, {})
+        codigo_ibge = catalog_info.get("codigo_ibge", 4300000)
+        municipio = catalog_info.get("municipio", station_meta.get("ESTACAO", "N/A"))
+
+        lat = float(station_meta.get("LATITUDE", str(catalog_info.get("lat", -31.0))).replace(",", "."))
+        lon = float(station_meta.get("LONGITUDE", str(catalog_info.get("lon", -52.0))).replace(",", "."))
         alt = float(station_meta.get("ALTITUDE", "50.0").replace(",", "."))
 
         # Carrega dados horários
@@ -67,6 +81,7 @@ def transform_bronze_to_silver(bronze_dir: str = "data/bronze", output_path: str
         ).reset_index()
 
         daily["station_id"] = code
+        daily["codigo_ibge"] = codigo_ibge
         daily["municipio"] = municipio
         daily["lat"] = lat
         daily["lon"] = lon
@@ -74,9 +89,14 @@ def transform_bronze_to_silver(bronze_dir: str = "data/bronze", output_path: str
 
         daily_records.append(daily)
 
+    if not daily_records:
+        raise ValueError(f"Nenhum registro encontrado em {bronze_dir}")
+
     df_silver = pd.concat(daily_records, ignore_index=True).sort_values(["station_id", "date"]).reset_index(drop=True)
-    df_silver.to_parquet(output_path, index=False)
-    # Também gera espelho CSV para interoperabilidade
+    try:
+        df_silver.to_parquet(output_path, index=False)
+    except Exception:
+        pass
     df_silver.to_csv(output_path.replace(".parquet", ".csv"), index=False, sep=";", decimal=",")
     print(f"🥈 [Silver Layer] Tabela Fato Diária criada com sucesso: {output_path} ({len(df_silver)} registros)")
     return df_silver
@@ -92,10 +112,16 @@ def transform_silver_to_gold(silver_path: str = "data/silver/fact_weather_daily.
     - Codificação trigonométrica da sazonalidade (sen/cos do dia do ano).
     """
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
-    if silver_path.endswith(".parquet"):
-        df_silver = pd.read_parquet(silver_path)
+    if silver_path.endswith(".parquet") and os.path.exists(silver_path):
+        try:
+            df_silver = pd.read_parquet(silver_path)
+        except Exception:
+            csv_alt = silver_path.replace(".parquet", ".csv")
+            df_silver = pd.read_csv(csv_alt, sep=";", decimal=",")
+            df_silver["date"] = pd.to_datetime(df_silver["date"])
     else:
-        df_silver = pd.read_csv(silver_path, sep=";", decimal=",")
+        csv_path = silver_path if silver_path.endswith(".csv") else silver_path.replace(".parquet", ".csv")
+        df_silver = pd.read_csv(csv_path, sep=";", decimal=",")
         df_silver["date"] = pd.to_datetime(df_silver["date"])
 
     dfs = []
@@ -130,7 +156,10 @@ def transform_silver_to_gold(silver_path: str = "data/silver/fact_weather_daily.
 
     df_gold = pd.concat(dfs, ignore_index=True)
     df_gold = df_gold.dropna(subset=["rain_tomorrow", "precip_lag_2d", "precip_sum_7d", "pressure_change_24h"]).reset_index(drop=True)
-    df_gold.to_parquet(output_path, index=False)
+    try:
+        df_gold.to_parquet(output_path, index=False)
+    except Exception:
+        pass
     df_gold.to_csv(output_path.replace(".parquet", ".csv"), index=False, sep=";", decimal=",")
     print(f"🥇 [Gold Layer] Tabela de Features Ouro criada com sucesso: {output_path} ({len(df_gold)} registros)")
     return df_gold
