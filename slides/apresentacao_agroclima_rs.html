@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgroClima RS — Apresentação Oficial</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  body { background: #0f172a; color: #1e293b; display: flex; flex-direction: column; align-items: center; padding: 30px 15px; }
+  
+  .controls {
+    position: sticky; top: 15px; z-index: 100;
+    background: rgba(30, 41, 59, 0.95); backdrop-filter: blur(8px);
+    border: 1px solid #334155; padding: 10px 24px; border-radius: 40px;
+    display: flex; gap: 15px; align-items: center; margin-bottom: 25px;
+    color: #f8fafc; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5);
+  }
+  .controls button {
+    background: #0284c7; color: white; border: none; padding: 8px 18px;
+    border-radius: 20px; font-weight: 600; cursor: pointer; transition: 0.2s;
+  }
+  .controls button:hover { background: #0369a1; }
+  .counter { font-size: 14px; font-weight: 500; color: #94a3b8; }
+  
+  .deck-container {
+    width: 100%; max-width: 1050px;
+    display: flex; flex-direction: column; gap: 35px;
+  }
+  
+  .slide-card {
+    background: #ffffff; width: 100%; aspect-ratio: 16 / 9;
+    border-radius: 12px; padding: 48px 56px;
+    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.4);
+    display: flex; flex-direction: column; justify-content: flex-start;
+    position: relative; overflow: hidden;
+  }
+  .slide-num {
+    position: absolute; top: 24px; right: 32px;
+    font-size: 13px; font-weight: 700; color: #64748b; text-transform: uppercase;
+    background: #f1f5f9; padding: 4px 10px; border-radius: 6px;
+  }
+  .slide-title {
+    font-size: 26px; font-weight: 800; color: #0f172a; margin-bottom: 24px;
+    border-bottom: 3px solid #0284c7; padding-bottom: 12px; display: inline-block;
+  }
+  ul { list-style: none; display: flex; flex-direction: column; gap: 16px; margin-top: 8px; }
+  li {
+    font-size: 16px; line-height: 1.55; color: #334155; position: relative; padding-left: 24px;
+  }
+  li::before {
+    content: "■"; color: #0284c7; font-size: 12px; position: absolute; left: 0; top: 3px;
+  }
+  li strong { color: #0f172a; }
+  
+  table {
+    width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 15px;
+  }
+  th, td {
+    padding: 10px 14px; text-align: left; border-bottom: 1px solid #e2e8f0;
+  }
+  th { background: #f8fafc; color: #0f172a; font-weight: 700; }
+  tr:hover { background: #f1f5f9; }
+  
+  .tag {
+    display: inline-block; background: #e0f2fe; color: #0369a1;
+    font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 4px;
+  }
+
+  @media print {
+    body { background: white; padding: 0; }
+    .controls { display: none; }
+    .slide-card { page-break-after: always; box-shadow: none; border: 1px solid #ccc; }
+  }
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <span>🌾 <strong>AgroClima RS</strong></span>
+  <span class="counter">12 Slides de Apresentação</span>
+  <button onclick="window.print()">🖨️ Salvar como PDF / Imprimir</button>
+</div>
+
+<div class="deck-container">
+
+  <div class="slide-card" id="slide-1">
+    <div class="slide-num">Slide 1 de 12</div>
+    <div class="slide-title">Capa</div>
+    <ul>
+      <li><strong>Título:</strong> AgroClima RS: Pipeline de Dados Meteorológicos e Previsão de Chuva</li>
+      <li><strong>Subtítulo:</strong> Engenharia de Dados aplicada ao monitoramento climático no Sul do Rio Grande do Sul</li>
+      <li><strong>Recorte:</strong> Região Geográfica Intermediária de Pelotas (IBGE 4302)</li>
+      <li><strong>Equipe:</strong> [Nome dos Integrantes]</li>
+    </ul>
+  </div>
+
+  <div class="slide-card" id="slide-2">
+    <div class="slide-num">Slide 2 de 12</div>
+    <div class="slide-title">O Problema</div>
+    <ul>
+      <li><strong>Fragmentação dos dados:</strong> Medições climáticas e registros agrícolas estão em portais separados e formatos legados (séries horárias brutas, sentinelas `-9999`, falta de padronização).</li>
+      <li><strong>Escopo amplo demais:</strong> Projetos que tentam cobrir todo o território nacional perdem precisão e sofrem com variações regionais extremas.</li>
+      <li><strong>Necessidade técnica:</strong> Construir um fluxo que receba dados brutos, trate inconsistências e disponibilize tabelas analíticas confiáveis para uso agronômico e preditivo.</li>
+    </ul>
+  </div>
+
+  <div class="slide-card" id="slide-3">
+    <div class="slide-num">Slide 3 de 12</div>
+    <div class="slide-title">Objetivo</div>
+    <ul>
+      <li><strong>Principal:</strong> Implementar um pipeline de ponta a ponta para ingerir, padronizar e agregar dados meteorológicos do Sul do RS.</li>
+      <li><strong>Previsão (D+1):</strong> Treinar modelos para estimar a ocorrência de chuva no dia seguinte a partir de variáveis físicas diárias.</li>
+      <li><strong>Camada Agrícola:</strong> Deixar o esquema de dados modelado para cruzamento com estatísticas oficiais de safras (IBGE/CONAB).</li>
+    </ul>
+  </div>
+
+  <div class="slide-card" id="slide-4">
+    <div class="slide-num">Slide 4 de 12</div>
+    <div class="slide-title">Recorte Territorial</div>
+    <ul>
+      <li><strong>Definição:</strong> Região Geográfica Intermediária de Pelotas (código IBGE 4302).</li>
+      <li><strong>Composição:</strong> Regiões Imediatas de Pelotas e Bagé.</li>
+      <li><strong>10 Estações INMET utilizadas:</strong></li>
+      <li>Pelotas/Capão do Leão (`A887`), Bagé (`A827`), Rio Grande (`A802`), Santa Vitória do Palmar (`A899`), Camaquã (`A838`), Jaguarão (`A836`), Canguçu (`A811`), Pinheiro Machado (`B823`), Aceguá (`B828`) e Herval (`B826`).</li>
+      <li><strong>Critério de exclusão:</strong> Estações com falhas prolongadas de sensores (>30% de nulos, como Dom Pedrito `A881`) foram retiradas.</li>
+    </ul>
+  </div>
+
+  <div class="slide-card" id="slide-5">
+    <div class="slide-num">Slide 5 de 12</div>
+    <div class="slide-title">Fontes de Dados</div>
+    <ul>
+      <li><strong>Clima (INMET):</strong> Dados horários de estações automáticas (temperatura, umidade, pressão barométrica, radiação, vento e precipitação).</li>
+      <li><strong>APIs Complementares:</strong> Open-Meteo e NASA POWER para consulta e atualização contínua.</li>
+      <li><strong>Agricultura (Fase 2):</strong> Séries oficiais de produção e produtividade da PAM/IBGE e relatórios de safra da CONAB.</li>
+    </ul>
+  </div>
+
+  <div class="slide-card" id="slide-6">
+    <div class="slide-num">Slide 6 de 12</div>
+    <div class="slide-title">Arquitetura de Dados</div>
+    <ul>
+      <li><strong>Bronze (`data/bronze/`):</strong> Arquivos CSV originais por estação, preservando os dados brutos.</li>
+      <li><strong>Prata (`data/silver/fact_weather_daily`):</strong> Limpeza, descarte de metadados de cabeçalho, conversão numérica e agregação horária para diária em Parquet.</li>
+      <li><strong>Ouro (`data/gold/features_rain_d1`):</strong> Cálculo de lags, acumulados móveis, variação de pressão e alvo binário D+1.</li>
+      <li><strong>Consumo:</strong> Disponibilização para consultas SQL via AWS Athena / Glue Catalog e treinamento de modelos de Machine Learning.</li>
+    </ul>
+  </div>
+
+  <div class="slide-card" id="slide-7">
+    <div class="slide-num">Slide 7 de 12</div>
+    <div class="slide-title">Modelo de Dados</div>
+    <ul>
+      <li><strong>Tabela Prata (`fact_weather_daily`):</strong></li>
+      <li>Chave: `station_id` + `date`.</li>
+      <li>Atributos: `codigo_ibge`, `municipio`, `temp_min`, `temp_max`, `temp_avg`, `humidity_avg`, `pressure_avg`, `wind_speed`, `solar_radiation`, `precip_mm`.</li>
+      <li><strong>Tabela Ouro (`features_rain_d1`):</strong></li>
+      <li>Chave: `station_id` + `date`.</li>
+      <li>Alvo: `rain_tomorrow` (1 se precipitação em D+1 >= 1.0 mm, senão 0).</li>
+      <li>Features preditivas: `pressure_change_24h`, `precip_sum_7d`, `dry_days`, etc.</li>
+    </ul>
+  </div>
+
+  <div class="slide-card" id="slide-8">
+    <div class="slide-num">Slide 8 de 12</div>
+    <div class="slide-title">Qualidade e Tratamento dos Dados</div>
+    <ul>
+      <li><strong>Base consolidada:</strong> 2.430 registros diários (janeiro a agosto de 2026).</li>
+      <li><strong>Integridade:</strong> Nenhuma duplicidade encontrada na chave `station_id + date`.</li>
+      <li><strong>Valores ausentes:</strong> Identificados principalmente na variável de vento (`wind_speed`).</li>
+      <li><strong>Tratamento:</strong> Imputação pela mediana calculada exclusivamente no conjunto de treino, evitando vazamento de dados (*data leakage*).</li>
+    </ul>
+  </div>
+
+  <div class="slide-card" id="slide-9">
+    <div class="slide-num">Slide 9 de 12</div>
+    <div class="slide-title">Engenharia de Features</div>
+    <ul>
+      <li><strong>Variação Barométrica 24h (`pressure_change_24h`):</strong> Mede a diferença de pressão ($P_t - P_{t-1}$). Quedas bruscas são o principal sinal físico de frentes frias no Sul.</li>
+      <li><strong>Acumulados móveis:</strong> Chuva somada nos últimos 3 e 7 dias (`precip_sum_3d`, `precip_sum_7d`).</li>
+      <li><strong>Estiagem:</strong> Contagem de dias consecutivos sem chuva (`dry_days`).</li>
+      <li><strong>Sazonalidade:</strong> Seno e cosseno do dia do ano para representar ciclos astronômicos contínuos.</li>
+    </ul>
+  </div>
+
+  <div class="slide-card" id="slide-10">
+    <div class="slide-num">Slide 10 de 12</div>
+    <div class="slide-title">Estratégia de Modelagem</div>
+    <ul>
+      <li><strong>Validação Temporal:</strong></li>
+      <li>Treino: 01/01/2026 a 30/06/2026 (1.685 registros — Verão e Outono).</li>
+      <li>Teste: 01/07/2026 a 31/08/2026 (590 registros — Inverno).</li>
+      <li><strong>Modelos avaliados:</strong></li>
+      <li>Regressão Logística (com dados padronizados).</li>
+      <li>Random Forest Classifier (150 estimadores).</li>
+      <li>XGBoost Classifier (regularizado).</li>
+    </ul>
+  </div>
+
+  <div class="slide-card" id="slide-11">
+    <div class="slide-num">Slide 11 de 12</div>
+    <div class="slide-title">Resultados de Teste (Holdout)</div>
+    <ul>
+      <li><strong>Variável mais relevante:</strong> Queda de pressão barométrica em 24h, seguida pela umidade relativa média diária.</li>
+    </ul>
+    <table>
+      <tr><th>Modelo</th><th>ROC-AUC</th><th>F1-Score</th><th>Características</th></th>
+      <tr><td><strong>Logistic Regression</strong></td><td>0.7909</td><td>0.6911</td><td>Baseline simples, estável e com boa sensibilidade</td></td>
+      <tr><td><strong>Random Forest</strong></td><td><strong>0.8035</strong></td><td>0.6568</td><td>Maior poder de separação probabilística</td></td>
+      <tr><td><strong>XGBoost</strong></td><td>0.7850</td><td>0.6720</td><td>Boa calibração probabilística com regularização</td></td>
+    </table>
+  </div>
+
+  <div class="slide-card" id="slide-12">
+    <div class="slide-num">Slide 12 de 12</div>
+    <div class="slide-title">Limitações e Próximos Passos</div>
+    <ul>
+      <li><strong>Janela temporal:</strong> O MVP utiliza dados de 2026. A evolução natural é expandir a ingestão para séries de 5 a 10 anos.</li>
+      <li><strong>Rigor metodológico:</strong> Dados agrícolas sintéticos foram descartados; a integração de produtividade aguarda a consolidação das safras no IBGE/CONAB.</li>
+      <li><strong>Próximas etapas:</strong> Agendamento do pipeline serverless na nuvem (AWS Lambda + S3) e disponibilização de API para consulta de alertas meteorológicos municipais.</li>
+    </ul>
+  </div>
+
+</div>
+</body>
+</html>
