@@ -81,9 +81,6 @@ agroclima-rs/
 │   └── outputs.tf
 ├── tests/
 │   └── test_pipeline.py                            # Testes unitários das transformações
-└── slides/
-    ├── apresentacao_agroclima_rs.pptx              # Apresentação em PowerPoint (12 slides)
-    └── apresentacao_agroclima_rs.md                # Roteiro textual dos slides
 ```
 
 ---
