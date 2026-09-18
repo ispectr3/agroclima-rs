@@ -105,22 +105,32 @@ agroclima-rs/
 - `precip_sum_3d`, `precip_sum_7d` (float): Chuva acumulada nos últimos 3 e 7 dias.
 - `dry_days` (int): Contagem de dias secos consecutivos até a data atual.
 - `day_of_year_sin`, `day_of_year_cos` (float): Codificação cíclica do dia do ano para sazonalidade.
+- `precip_lag_1d` (float): Chuva do dia anterior (D-1).
+- `precip_lag_2d` (float): Chuva de dois dias antes (D-2).
+- `rain_days_7d` (int): Número de dias com chuva (>= 1,0 mm) nos últimos 7 dias.
+- `temp_avg_3d` (float): Média móvel da temperatura média nos últimos 3 dias.
+- `humidity_avg_3d` (float): Média móvel da umidade relativa nos últimos 3 dias.
+- `lat`, `lon` (float): Latitude e longitude da estação.
+- `altitude` (float): Altitude da estação (m).
+- `precip_tomorrow` (float): Volume de chuva do dia seguinte; usado para derivar `rain_tomorrow`, não entra como feature no modelo.
 
 ---
 
 ## 5. Resultados de Validação (Modelagem)
 
 A validação foi feita com divisão temporal estrita (*out-of-time*) para evitar vazamento do futuro:
-- **Treino:** Janeiro a Junho de 2026 (1.685 registros)
-- **Teste cego (Holdout):** Julho e Agosto de 2026 (590 registros)
+- **Treino:** Janeiro a Junho de 2026 (1.742 registros)
+- **Teste cego (Holdout):** Julho e Agosto de 2026 (533 registros)
 
-| Modelo | ROC-AUC | F1-Score | Características |
-|---|---:|---:|---|
-| **Logistic Regression** | 0.7909 | 0.6911 | Baseline linear simples com dados normalizados |
-| **Random Forest** | **0.8035** | 0.6568 | Melhor capacidade de separação probabilística |
-| **XGBoost** | 0.7850 | 0.6720 | Boa calibração probabilística com regularização |
+| Modelo                  | ROC-AUC    | F1-Score | Características                                 |
+| ----------------------- | ---------- | -------- | ----------------------------------------------- |
+| **Logistic Regression** | 0.7909     | 0.6911   | Baseline linear simples com dados normalizados  |
+| **Random Forest**       | **0.8035** | 0.6568   | Melhor capacidade de separação probabilística   |
+| **XGBoost**             | 0.6663     | 0.3614   | Precisa de tuning; recall baixo pra classe chuva |
 
-A feature com maior ganho de informação nos modelos baseados em árvore foi a **variação barométrica em 24h (`pressure_change_24h`)**, seguida da umidade relativa e acumulados de chuva.
+*Nota:* a classificação usa threshold de 0,30 (não o padrão 0,5) pra decidir "vai chover" a partir da probabilidade prevista.
+
+A feature com maior ganho de informação no Random Forest foi a **variação barométrica em 24h (`pressure_change_24h`)**, seguida da **sazonalidade do ano (`day_of_year_sin`/`day_of_year_cos`)** e de **temperatura mínima e radiação solar**. No XGBoost a ordem muda ligeiramente (temperatura mínima aparece em primeiro), mas a pressão barométrica e a sazonalidade seguem entre as mais relevantes nos dois modelos.
 
 ---
 
